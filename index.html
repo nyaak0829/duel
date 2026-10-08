@@ -379,7 +379,7 @@ function nReact(rip,who){who=who||nc;const P=who===pc?MB:cfg,pr=who===pc?mpR:pR;
 if(rip&&Math.random()<P.np){r=.03+Math.random()*Math.max(.01,ex.cm*.9-.03);cost=(P.sCost+P.sFast)*(who.rd?P.dtC:1)}
 r=Math.max(r,.03);const can=who.sta>=cost&&r<ex.w;if(can){const o={t:r,cost,miss:Math.random()<(who.rd?0:P.miss)};if(who===pc)ex.m=o;else ex.n=o}
 if(!rip&&!ex.lock&&who.stun>0&&who.dcd<=0&&(!can||who.mode=='flee')){const re=Math.max(.05,Math.min(P.rMin,ex.w*.8));if(who.sta+P.sReg*[1,1,P.i2Rg,P.i3Rg,0][inj(who)]*Math.min(re,who.stun)>=P.dSta&&Math.random()<P.eP){if(who===pc){ex.me=re;ex.m=null}else{ex.es=re;ex.n=null}}}}
-function conv(e,who){const nt=e.type=='H'?'L':'H';if(BOT.m){if(who===pc)rec(nt);else mrec(nt)}pops.push({x:who.x,y:who.y-88,s:e.type=='H'?'강→약!':'약→강!',t:0,c:'#6fd8ff',k:1});e.type=nt;e.sd=0;e.w=nt=='H'?cfg.wH:cfg.wL;say((who===nc?'적: ':'')+(nt=='H'?'약 → 강 전환!':'강 → 약 전환!'))}
+function conv(e,who){const nt=e.type=='H'?'L':'H';if(BOT.m){if(who===pc)rec(nt);else mrec(nt)}pops.push({x:who.x,y:who.y-88,s:e.type=='H'?'강→약!':'약→강!',t:0,c:'#6fd8ff'});e.type=nt;e.sd=0;e.w=nt=='H'?cfg.wH:cfg.wL;say((who===nc?'적: ':'')+(nt=='H'?'약 → 강 전환!':'강 → 약 전환!'))}
 function endEng(){nc.chain=0;nc.cool=cfg.cool;nc.dis=1;if(BOT.m&&MB){pc.chain=0;pc.cool=MB.cool;pc.dis=1}}
 function hurt(e,d,m,k){SFX.hit(k);const i0=inj(e),dm=DM[k]||DM.L,b0=e.bleed!=null&&e.hp>0;e.hp-=d;if(b0){e.bleed-=d*cfg.bH;if(e.bleed<=0)e.hp=Math.min(e.hp,0)}e.flash=.35;e.stun=cfg.stun;e.dash=null;e.sw=null;e.dq=null;pops.push({x:e.x,y:e.y-70,s:dm[0],t:0,c:dm[1],k:1});ex=null;endEng();
 const i1=inj(e);say(i1>i0?m+' — '+(e===pc?'내':'적')+' 상태: '+IN[i1]:m);if(i1>i0&&i1<4)pops.push({x:e.x,y:e.y-96,s:IN[i1]+'!',t:0,c:IC[i1]});
@@ -586,7 +586,7 @@ for(let i=0;i<8;i++){const an=i*.8+tm*2.2,len=5+7*Math.abs(Math.sin(tm*17+i*2.3)
 x.fillStyle='rgba(255,255,255,.95)';x.beginPath();x.arc(cxp,cyp,2.2+1*Math.sin(tm*30),0,7);x.fill();
 const f=Math.max(0,1-ex.t/ex.w),col=f<.3?'#ff3b30':'#ff9a1f',ly=Math.max(46,cyp-62),tx=T(ex.type=='H'?'약으로 전환!':'강으로 전환!');
 x.lineWidth=3;x.strokeStyle='rgba(0,0,0,.45)';x.beginPath();x.arc(cxp,cyp,23,0,7);x.stroke();x.strokeStyle=col;x.beginPath();x.arc(cxp,cyp,23,-Math.PI/2,-Math.PI/2+Math.PI*2*f);x.stroke();
-x.textAlign='center';x.lineJoin='round';x.font='bold 22px sans-serif';x.lineWidth=4;x.strokeStyle='rgba(0,0,0,.85)';x.strokeText(tx,cxp,ly);x.fillStyle=col;x.fillText(tx,cxp,ly);
+if(!PT){x.textAlign='center';x.lineJoin='round';x.font='bold 22px sans-serif';x.lineWidth=4;x.strokeStyle='rgba(0,0,0,.85)';x.strokeText(tx,cxp,ly);x.fillStyle=col;x.fillText(tx,cxp,ly)}
 x.restore()}
 function ghost(g){x.save();x.translate(g.x-cam,g.y);x.scale(g.dir,1);x.globalAlpha=.4*(1-g.t/.25);x.fillStyle='#333';x.fillRect(-8,-12,6,12);x.fillRect(2,-12,6,12);x.fillStyle=g.c;x.fillRect(-11,-34,22,24);x.fillStyle=g.skin;x.beginPath();x.arc(0,-44,11,0,7);x.fill();x.restore()}
 function rr(a,b,w,h,r){x.beginPath();x.moveTo(a+r,b);x.arcTo(a+w,b,a+w,b+h,r);x.arcTo(a+w,b+h,a,b+h,r);x.arcTo(a,b+h,a,b,r);x.arcTo(a,b,a+w,b,r);x.closePath()}
@@ -633,7 +633,7 @@ if(ex.lock)h=Tf(mobile?'교착 상태! — 먼저 반대 종류{0}로 전환하�
 else if(mine)h=early?(ex.pre?Tf('선입력 잠금{0} — 전환 구간 종료 대기',KP(ex.pre.k=='H'?cfg.kH:cfg.kL)):T('전환 구간 — 끝난 뒤 보고 누르세요 (지금 누르면 낚일 수 있어요)')):(ex.type=='H'?Tf('강공격! → 약공격{0}으로 대응',KP(cfg.kL)):Tf('약공격! → 강공격{0}으로 대응',KP(cfg.kH)));
 else h=T(early?'전환 가능 — 반대 공격 키':(ex.type=='L'?'약공격 중 · 방향키: 후퇴':'내가 선공 — 방향키로 거두고 후퇴 가능'));
 x.textAlign='center';x.font='14px sans-serif';x.fillStyle='#fff';x.fillText(h,400,398,780)}
-if(msgT>0){x.textAlign='center';x.font='bold 20px sans-serif';x.fillStyle='#fff';x.strokeStyle='#000';x.lineWidth=4;x.strokeText(T(msg),400,FY+36,600);x.fillText(T(msg),400,FY+36,600)}
+if(msgT>0&&!PT){x.textAlign='center';x.font='bold 20px sans-serif';x.fillStyle='#fff';x.strokeStyle='#000';x.lineWidth=4;x.strokeText(T(msg),400,FY+36,600);x.fillText(T(msg),400,FY+36,600)}
 if(BOT.lv){x.textAlign='right';x.font='bold 11px sans-serif';x.fillStyle='rgba(255,255,255,.75)';x.fillText(BOT.m?Tf('NPC 복제 봇 · {0} · {1}승 {2}패',T(BOT.mn),BOT.w,BOT.l):Tf('오토 플레이 {0}단계 · {1}승 {2}패',BOT.lv,BOT.w,BOT.l),FX+FW-(mobile?70:0),24)}
 if(PT){if(DIFF.length>1){x.textAlign='left';x.font='bold 11px sans-serif';x.fillStyle='rgba(255,255,255,.75)';x.fillText(Tf('난이도: {0}',T(DIFF[curD].name)),FX,24)}}else{x.textAlign='left';x.font='11px sans-serif';x.fillStyle='rgba(255,255,255,.75)';x.fillText(Tf('내 최근 반응 {0}% · 적 스태미나 {1}/{2} · 연속 {3} · 읽음 {4} · 적 AI {5}{6}',pR*100|0,nc.sta|0,nc.msta|0,nc.chain,nc.rd||'-',T(nc.mode=='approach'?'접근':'도망'),nc.dcd>0?Tf(' · 적 대쉬 {0}s',nc.dcd.toFixed(1)):''),FX,442)}
 if(over){x.fillStyle='rgba(0,0,0,.6)';x.fillRect(0,0,VW,CH);x.textAlign='center';x.fillStyle='#fff';x.font='bold 40px sans-serif';x.fillText(T(over),400,215);x.font='18px sans-serif';x.fillText(T(ovS),400,246);x.font='16px sans-serif';x.fillText(T(BOT.lv?(mobile?'곧 자동으로 다시 시작해요 · ⚙ 메뉴':PT?'곧 자동으로 다시 시작해요 · Esc: 키 설정 화면':'곧 자동으로 다시 시작해요 · Esc: 설정 화면'):mobile?'화면을 터치하면 재시작 · ⚙ 메뉴':PT?'R: 재시작 · Esc: 키 설정 화면':'R: 재시작 · Esc: 설정 화면'),400,280)}}
