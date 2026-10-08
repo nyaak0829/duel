@@ -379,9 +379,9 @@ function nReact(rip,who){who=who||nc;const P=who===pc?MB:cfg,pr=who===pc?mpR:pR;
 if(rip&&Math.random()<P.np){r=.03+Math.random()*Math.max(.01,ex.cm*.9-.03);cost=(P.sCost+P.sFast)*(who.rd?P.dtC:1)}
 r=Math.max(r,.03);const can=who.sta>=cost&&r<ex.w;if(can){const o={t:r,cost,miss:Math.random()<(who.rd?0:P.miss)};if(who===pc)ex.m=o;else ex.n=o}
 if(!rip&&!ex.lock&&who.stun>0&&who.dcd<=0&&(!can||who.mode=='flee')){const re=Math.max(.05,Math.min(P.rMin,ex.w*.8));if(who.sta+P.sReg*[1,1,P.i2Rg,P.i3Rg,0][inj(who)]*Math.min(re,who.stun)>=P.dSta&&Math.random()<P.eP){if(who===pc){ex.me=re;ex.m=null}else{ex.es=re;ex.n=null}}}}
-function conv(e,who){const nt=e.type=='H'?'L':'H';if(BOT.m){if(who===pc)rec(nt);else mrec(nt)}pops.push({x:who.x,y:who.y-88,s:e.type=='H'?'강→약!':'약→강!',t:0,c:'#6fd8ff'});e.type=nt;e.sd=0;e.w=nt=='H'?cfg.wH:cfg.wL;say((who===nc?'적: ':'')+(nt=='H'?'약 → 강 전환!':'강 → 약 전환!'))}
+function conv(e,who){const nt=e.type=='H'?'L':'H';if(BOT.m){if(who===pc)rec(nt);else mrec(nt)}pops.push({x:who.x,y:who.y-88,s:e.type=='H'?'강→약!':'약→강!',t:0,c:'#6fd8ff',k:1});e.type=nt;e.sd=0;e.w=nt=='H'?cfg.wH:cfg.wL;say((who===nc?'적: ':'')+(nt=='H'?'약 → 강 전환!':'강 → 약 전환!'))}
 function endEng(){nc.chain=0;nc.cool=cfg.cool;nc.dis=1;if(BOT.m&&MB){pc.chain=0;pc.cool=MB.cool;pc.dis=1}}
-function hurt(e,d,m,k){SFX.hit(k);const i0=inj(e),dm=DM[k]||DM.L,b0=e.bleed!=null&&e.hp>0;e.hp-=d;if(b0){e.bleed-=d*cfg.bH;if(e.bleed<=0)e.hp=Math.min(e.hp,0)}e.flash=.35;e.stun=cfg.stun;e.dash=null;e.sw=null;e.dq=null;pops.push({x:e.x,y:e.y-70,s:dm[0],t:0,c:dm[1]});ex=null;endEng();
+function hurt(e,d,m,k){SFX.hit(k);const i0=inj(e),dm=DM[k]||DM.L,b0=e.bleed!=null&&e.hp>0;e.hp-=d;if(b0){e.bleed-=d*cfg.bH;if(e.bleed<=0)e.hp=Math.min(e.hp,0)}e.flash=.35;e.stun=cfg.stun;e.dash=null;e.sw=null;e.dq=null;pops.push({x:e.x,y:e.y-70,s:dm[0],t:0,c:dm[1],k:1});ex=null;endEng();
 const i1=inj(e);say(i1>i0?m+' — '+(e===pc?'내':'적')+' 상태: '+IN[i1]:m);if(i1>i0&&i1<4)pops.push({x:e.x,y:e.y-96,s:IN[i1]+'!',t:0,c:IC[i1]});
 if(e.hp<=0){over=e===pc?'패배':'승리';ovS=(e===pc?'플레이어':'적')+' 전투불능'}}
 function resp(side,k,cost,rt){const e=ex,a=e.a,d=e.d,t=e.type;if(BOT.m){if(side=='p')rec(k);else mrec(k)}
@@ -623,7 +623,7 @@ function draw(){cam=Math.max(0,Math.min(W-VW,pc.x-VW/2));x.fillStyle='#1d1b19';x
 x.save();x.beginPath();x.rect(FX,FY,FW,FH);x.clip();x.translate(FX,FY);x.scale(FS,FS);x.drawImage(bg,0,0,W,H,0,0,W,H);
 gh.forEach(ghost);lockGlow();[pc,nc].sort((a,b)=>a.y-b.y).forEach(body);lockFx();
 x.font='bold 22px sans-serif';x.textAlign='center';
-x.lineJoin='round';pops.forEach(p=>{const py=Math.max(24,p.y-p.t*40);x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=4;x.strokeText(T(p.s),p.x-cam,py);x.fillStyle=p.c||'#ff4a3a';x.fillText(T(p.s),p.x-cam,py)});
+x.lineJoin='round';pops.forEach(p=>{if(PT&&!p.k)return;const py=Math.max(24,p.y-p.t*40);x.strokeStyle='rgba(0,0,0,.8)';x.lineWidth=4;x.strokeText(T(p.s),p.x-cam,py);x.fillStyle=p.c||'#ff4a3a';x.fillText(T(p.s),p.x-cam,py)});
 x.restore();x.strokeStyle='rgba(255,255,255,.14)';x.lineWidth=2;x.strokeRect(FX-1,FY-1,FW+2,FH+2);hud();bleedBar();
 if(ex){const f=1-ex.t/ex.w,mine=ex.d===pc,early=ex.t<ex.cm,tk=281+238*(1-ex.cm/ex.w);
 x.fillStyle='rgba(0,0,0,.6)';x.fillRect(280,404,240,12);x.fillStyle=ex.lock?'#ff9a1f':early?'#f0c030':(mine?'#ff5a4a':'#8aa');x.fillRect(281,405,238*Math.max(0,f),10);
