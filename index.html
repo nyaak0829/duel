@@ -864,7 +864,9 @@ function tmStart(from,f){
 function tmEnd(){if(!TM)return;const b=TM.bot,c0=TM.cfg0;tmPzHide();tmKgHide();tmSpHide();TM=null;const o=$('tmO');if(o)o.hidden=true;if(b)setBot(b);tmNpcRestore(c0)}
 function tmExit(){tmEnd();toMenu()}
 // [실전 경험하기]: 튜토리얼을 끝내고 CLASS 10 전투로 바로 시작해요(CLASS 10이 없거나 아직 잠겨 있으면 열려 있는 첫 난이도로)
-function tmPlay(){if(!TM)return;const L=lvList();let j=L.findIndex(n=>/CLASS\s*10(?!\d)/.test(n));if(j<0||!pgOpen(j))j=PT?pgFirst():-1;
+function tmPlay(){if(!TM)return;const L=lvList();let j=-1;
+ if(PT&&typeof tucCur=='function'){const t=tucCur();if(t){const ua=pgTua(t),ub=pgTub(t);j=ua?pgDn(ua):ub?pgDn(ub)+1:-1;if(j<0||j>=L.length||!pgOpen(j))j=-1}}
+ if(j<0)j=L.findIndex(n=>/CLASS\s*10(?!\d)/.test(n));if(j<0||!pgOpen(j))j=PT?pgFirst():-1;
  tmEnd();if(BOT.lv)setBot(0);
  if(j<0||j>=L.length){toMenu();return}
  if(PT){const ds=$('dfs');ds.value=String(j);ds.onchange()}else{$('ps').value=L[j];$('ld').onclick()}
