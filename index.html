@@ -955,8 +955,13 @@ function tmStart(from,f){
 // 나가기: 상태를 되돌려요(메뉴로 가는 건 toMenu 쪽에서 해요)
 function tmEnd(){if(!TM)return;const b=TM.bot,c0=TM.cfg0;tmPzHide();tmKgHide();tmSpHide();TM=null;const o=$('tmO');if(o)o.hidden=true;if(b)setBot(b);tmNpcRestore(c0)}
 function tmExit(){tmEnd();toMenu()}
-// [실전 경험하기]: 튜토리얼을 끝내고 CLASS 10 전투로 바로 시작해요(CLASS 10이 없거나 아직 잠겨 있으면 열려 있는 첫 난이도로)
-function tmPlay(){if(!TM)return;const L=lvList();let j=L.findIndex(n=>/CLASS\s*10(?!\d)/.test(n));if(j<0||!pgOpen(j))j=PT?pgFirst():-1;
+// [실전 경험하기]: 방금 마친 튜토리얼의 '마치면 열리는 난이도(ua)'로 이동한다.
+// 지정되지 않은 튜토리얼은 기존 장검 순차 진행에서 첫 미클리어 난이도로 이동한다.
+function tmPlay(){if(!TM)return;const L=lvList(),t=typeof tucCur==='function'?tucCur():null;
+ let j=t&&t.ua?L.indexOf(t.ua):-1;
+ if(j<0&&PT)j=DIFF.findIndex((d,i)=>pgOpen(i)&&!pgWon(i));
+ if(j<0&&PT)j=pgFirst();
+ if(j<0)j=L.findIndex(n=>/CLASS\s*10(?!\d)/.test(n));
  tmEnd();if(BOT.lv)setBot(0);
  if(j<0||j>=L.length){toMenu();return}
  if(PT){const ds=$('dfs');ds.value=String(j);ds.onchange()}else{$('ps').value=L[j];$('ld').onclick()}
@@ -1482,7 +1487,24 @@ if(PT){const ds=$('dfs'),ps=$('dfp'),mw=$('ptMyW'),ew=$('ptEnemyW'),TL=()=>typeo
  const classNames=Object.keys(pFiles).filter(n=>Number.isFinite(classLevel(n))).sort((a,b)=>classLevel(b)-classLevel(a));
  const names=classNames.length?classNames:DIFF.map(d=>d.name).filter(n=>Number.isFinite(classLevel(n))).sort((a,b)=>classLevel(b)-classLevel(a));
  if(!names.length)names.push(...DIFF.map(d=>d.name));
- const pop=()=>{const old=ps.value;ps.replaceChildren(...[...new Set(names)].map(n=>new Option(T(n),n)));ps.value=names.includes(old)?old:names[0]};
+ // 내 클래스는 무기 조합 9종 중 실제 클리어한 최고 CLASS까지 공유한다.
+ // 기존 장검의 d:CLASS 기록과 나머지 combo:<내 무기>:<적 무기>:CLASS 기록을 모두 사용한다.
+ // 진행 기록이 없으면 CLASS 10부터 시작한다. 적 클래스의 조합별 해금은 손대지 않는다.
+ const playerBestLevel=()=>{
+  let best=10;
+  for(const [key,done] of Object.entries(PGS)){
+   if(!done||!(/^d:CLASS\s/.test(key)||/^combo:[012]:[012]:CLASS\s/.test(key)))continue;
+   const m=/CLASS\s+(\d+(?:\.\d+)?)(?![\d.])/.exec(key);
+   if(m)best=Math.min(best,+m[1]);
+  }
+  return best;
+ };
+ const playerOpen=n=>!pgLk()||Number.isFinite(classLevel(n))&&classLevel(n)>=playerBestLevel();
+ const playerBest=()=>[...names].reverse().find(n=>playerOpen(n))||names[0];
+ const pop=()=>{const old=ps.value;
+  ps.replaceChildren(...[...new Set(names)].map(n=>{const ok=playerOpen(n),o=new Option((ok?'':'🔒 ')+T(n),n);o.disabled=!ok;if(!ok)o.title='다른 무기 조합 또는 장검 대 장검에서 이 CLASS까지 클리어하면 열려요';return o}));
+  ps.value=names.includes(old)&&playerOpen(old)?old:playerBest();
+ };
  const fill=()=>{const v=ds.value;ds.innerHTML='';const L=TL(),op=(n,i)=>{if(typeof i!='number'){const t=pgLk()?L.find(x=>'t:'+x.id===i):null;if(t&&!pgTo(t)){const o=new Option('🔒 '+n,i);o.disabled=true;o.title=Tf('{0} 난이도를 이기면 열려요',T(pgTub(t)));return o}return new Option(n,i)}const o=new Option((pgOpen(i)?'':'🔒 ')+T(n),i);if(!pgOpen(i)){o.disabled=true;o.title=pgWhy(i)}return o};
   if(L.length){const g1=document.createElement('optgroup');g1.label=T('튜토리얼');L.forEach(t=>g1.appendChild(op(tucName(t),'t:'+t.id)));ds.appendChild(g1);
    const g2=document.createElement('optgroup');g2.label=T('난이도');DIFF.forEach((d,i)=>g2.appendChild(op(d.name,i)));ds.appendChild(g2)}
@@ -1492,11 +1514,12 @@ if(PT){const ds=$('dfs'),ps=$('dfp'),mw=$('ptMyW'),ew=$('ptEnemyW'),TL=()=>typeo
   const t=PTUT&&TL().find(x=>x.id==PTUT);n.hidden=!t;n.textContent=t?Tf('튜토리얼 · 상대 난이도: {0}',t.npc?T(t.npc):T('마지막으로 고른 난이도')):''};
  const followEnemy=()=>{const d=DIFF[+ds.value];if(!d)return;let n=d.name;
   if(![...ps.options].some(o=>o.value===n)){const lv=classLevel(n);n=names.find(v=>classLevel(v)===lv)}
-  if(n&&[...ps.options].some(o=>o.value===n))ps.value=n};
+  // 적 클래스가 아직 내 클래스에 해금되지 않았으면, 내 쪽에서 사용 가능한 최고 CLASS를 쓴다.
+  ps.value=n&&playerOpen(n)?n:playerBest();};
  const applyPlayer=()=>{const n=ps.value,files=getPFiles(),p=files[n]||PT.playerCfg||DIFF[curD]&&DIFF[curD].cfg||{};
   pcCfg={...D,...p};roleMerge();sync()};
  // ▲는 숫자가 작은 더 높은 클래스로, ▼는 숫자가 큰 더 낮은 클래스로 한 단계 이동한다.
- const rankList=(enemy)=>enemy?DIFF.map((d,i)=>({name:d.name,value:String(i)})).filter(v=>Number.isFinite(classLevel(v.name))&&pgOpen(+v.value)).sort((a,b)=>classLevel(b.name)-classLevel(a.name)):names.map(n=>({name:n,value:n}));
+ const rankList=(enemy)=>enemy?DIFF.map((d,i)=>({name:d.name,value:String(i)})).filter(v=>Number.isFinite(classLevel(v.name))&&pgOpen(+v.value)).sort((a,b)=>classLevel(b.name)-classLevel(a.name)):names.filter(playerOpen).map(n=>({name:n,value:n}));
  const stepTarget=(enemy,up)=>{const sel=enemy?ds:ps,a=rankList(enemy),i=a.findIndex(v=>v.value===sel.value);return i<0?(a.length?a[up?a.length-1:0].value:null):(a[i+(up?1:-1)]||{}).value||null};
  const stepState=()=>{for(const [id,enemy,up] of [['dfsUp',true,true],['dfsDn',true,false],['dfpUp',false,true],['dfpDn',false,false]])$(id).disabled=!stepTarget(enemy,up)};
  const ap=(follow)=>{const v=ds.value,tn=v.slice(0,2)==='t:';PTUT=tn?v.slice(2):'';
@@ -1506,17 +1529,17 @@ if(PT){const ds=$('dfs'),ps=$('dfp'),mw=$('ptMyW'),ew=$('ptEnemyW'),TL=()=>typeo
   changeWeapon(my,enemy);const previous=ds.value;pop();fill();
   if(!pgIsBase()&&ds.value.startsWith('t:'))ds.value=pgFront();
   if(previous!==ds.value)ap(true);else ap(false);
-  const info=$('ptWeaponHelp');if(info)info.textContent=pgIsBase()?'기존 장검 순차 해금':'장검 클리어 기록 공유 + 이 무기 조합의 독립 해금';
+  const info=$('ptWeaponHelp');if(info)info.textContent=pgIsBase()?'적: 장검 순차 해금 / 내 클래스: 모든 조합 최고 클리어 CLASS까지 해금':'적: 조합별 해금 / 내 클래스: 모든 조합 최고 클리어 CLASS까지 해금';
  };
  mw.value=String(wMe());ew.value=String(WPN);
  mw.onchange=weaponChanged;ew.onchange=weaponChanged;
- pop();fill();ds.onchange=()=>ap(true);ps.onchange=()=>{applyPlayer();stepState()};
+ pop();fill();ds.onchange=()=>ap(true);ps.onchange=()=>{if(!playerOpen(ps.value))ps.value=playerBest();applyPlayer();stepState()};
 
  for(const [id,enemy,up] of [['dfsUp',true,true],['dfsDn',true,false],['dfpUp',false,true],['dfpDn',false,false]])$(id).onclick=()=>{const v=stepTarget(enemy,up);if(v===null)return;const sel=enemy?ds:ps;sel.value=v;sel.onchange()};
- ap(true);{const info=$('ptWeaponHelp');if(info)info.textContent=pgIsBase()?'기존 장검 순차 해금':'장검 클리어 기록 공유 + 이 무기 조합의 독립 해금'}window.dfsRefresh=()=>{const v=ds.value;fill();if(v!==ds.value)ap(true);else{note();stepState()}};
+ ap(true);{const info=$('ptWeaponHelp');if(info)info.textContent=pgIsBase()?'적: 장검 순차 해금 / 내 클래스: 모든 조합 최고 클리어 CLASS까지 해금':'적: 조합별 해금 / 내 클래스: 모든 조합 최고 클리어 CLASS까지 해금'}window.dfsRefresh=()=>{const v=ds.value,oldPlayer=ps.value;pop();fill();if(v!==ds.value)ap(true);else{if(oldPlayer!==ps.value)applyPlayer();note();stepState()}};
  if(pgLk()){const r=$('dfr');if(r){const b=document.createElement('button');b.type='button';b.id='pgR';b.style.cssText='margin-left:8px;font-size:12px;padding:3px 9px';b.textContent=T('진행 초기화');let tm=0;
   b.onclick=()=>{if(!tm){b.textContent=T('한 번 더 누르면 진행이 지워져요');tm=setTimeout(()=>{tm=0;b.textContent=T('진행 초기화')},3200);return}
-   clearTimeout(tm);tm=0;b.textContent=T('진행 초기화');PGS={};pgSave();ds.value='';fill();ap(true)};
+   clearTimeout(tm);tm=0;b.textContent=T('진행 초기화');PGS={};pgSave();ds.value='';pop();fill();ap(true)};
   r.appendChild(b)}}
  const h2=$('dfr').previousElementSibling,hs=!TL().length&&DIFF.length<2&&ps.options.length<2;if(TL().length&&h2)h2.textContent='난이도 · 튜토리얼';if(hs)$('dfr').style.display='none';if(hs&&h2)h2.style.display='none'}
 if(!PT){roleApply('player',rolePick.player[wMe()]);roleApply('npc',rolePick.npc[WPN]);roleSetupUI()}sync();if(!PT){rl();renderPubs();roleRender()}
