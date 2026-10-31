@@ -1076,7 +1076,6 @@ const TMCSS='#tmO,#tmP,#tmK{position:absolute;left:0;top:0;width:800px;height:45
  +'.tmO .tmGl{position:absolute;right:108px;top:48px;width:max-content;min-width:120px;max-width:176px;background:rgba(72,72,78,.66);border:1px solid rgba(255,255,255,.28);border-radius:8px;pointer-events:none}'
  +'.tmO .tmGi{padding:6px 9px 7px;color:#f1f1f3;font-size:11px;line-height:1.45;word-break:keep-all}'
  +'.tmO .tmGt{font-weight:700;color:#fff;display:flex;align-items:center;gap:6px}.tmO .tmGt span{flex:1}'
- +'.tmO .tmGk{pointer-events:auto;cursor:pointer;background:rgba(255,255,255,.22);color:#fff;border:0;border-radius:9px;padding:1px 7px;font-size:10px;font-weight:700;font-family:inherit}'
  +'.tmO .tmGr{white-space:normal;word-break:keep-all}.tmO .tmGr.ok{color:#a8e8b8;font-weight:700}.tmO .tmGr.cur{font-weight:700}.tmO .tmGr small{opacity:.7;margin-left:4px}'
  +'.tmO .tmGb{white-space:pre-wrap}.tmO .tmGf{margin-top:3px;color:#a8e8b8;font-weight:700}.tmO .tmGv{margin-top:3px;color:#ffb9ad;font-size:10px}'
  +'#tmO .tmOv{position:absolute;left:50%;top:84px;transform:translateX(-50%);padding:6px 30px;background:#4a3320;color:#ffd9d2;border:3px solid #b98b58;border-radius:14px;font-size:26px;font-weight:800;letter-spacing:.04em;white-space:nowrap;pointer-events:none}'
@@ -1134,8 +1133,7 @@ function tmPlay(){if(!TM)return;tmBack();const L=lvList(),t=typeof tucCur==='fun
 // 대사 상자 모양(CSS)은 한 번만 넣어요 — 게임 화면과 툴 미리보기가 같이 써요
 function tmCss(){if($('tmCss'))return;const st=document.createElement('style');st.id='tmCss';st.textContent=TMCSS;document.head.appendChild(st)}
 function tmOv(){let o=$('tmO');if(o)return o;tmCss();o=document.createElement('div');o.id='tmO';o.className='tmO';o.hidden=true;$('cw').appendChild(o);
- o.addEventListener('pointerdown',e=>{if(!TM)return;e.stopPropagation();const g=e.target.closest&&e.target.closest('.tmGk');if(g){e.preventDefault();tmSkip();return}
-  const ch=e.target.closest&&e.target.closest('.tmC');if(ch){e.preventDefault();tmPick(+ch.dataset.ch);return}
+ o.addEventListener('pointerdown',e=>{if(!TM)return;e.stopPropagation();const ch=e.target.closest&&e.target.closest('.tmC');if(ch){e.preventDefault();tmPick(+ch.dataset.ch);return}
   const b=e.target.closest&&e.target.closest('[data-tm]');if(b){e.preventDefault();b.dataset.tm=='play'?tmPlay():b.dataset.tm=='again'?tmAgain():tmExit();return}
   if(TM.dlg&&e.target.closest&&e.target.closest('.tmSh,.tmBx')){e.preventDefault();tmAdvance()}});
  o.addEventListener('pointerover',e=>{const c=TM&&TM.dlg&&e.target.closest&&e.target.closest('.tmC');if(c)tmChSel(+c.dataset.ch)});
@@ -1423,7 +1421,7 @@ function tmGoalHtml(s,c,pv){
   const lab=k=>T(TU_CK.find(x=>x[0]==k)[1]),row=(d,i)=>{const p=c.p[i],ok=p.v>=d.n-1e-9,cur=s.md=='seq'&&i==c.si&&!c.ok,hb=d.k=='heal'||d.k=='beat',v=d.k=='mv'?(Math.min(p.v,d.n)).toFixed(1):Math.min(p.v,d.n),tg=hb?(d.k=='heal'?Tf('{0} 상태까지 회복하기',T(TU_IN[d.st])):Tf('상대를 {0} 상태로 만들기',T(TU_IN[d.st]))):d.k=='mv'?Tf('{0} {1}/{2}초',lab(d.k),v,d.n):Tf('{0} {1}/{2}회',lab(d.k),v,d.n),
    tag=hb?(ok||pv?'':Tf('(지금 {0})',T(TU_IN[d.k=='heal'?tmInj(pc):tmInj(nc)]))):d.how=='chain'?T('(연속)'):d.how=='win'?Tf('({0}초 안에)',d.win):'';return'<div class="tmGr'+(ok?' ok':'')+(cur?' cur':'')+'">'+(ok?'✓ ':(s.md=='seq'?(i+1)+'. ':'○ '))+tuEsc(tg)+(tag?'<small>'+tuEsc(tag)+'</small>':'')+'</div>'};
   const hint=tuLv(s,'hint')?tmFmtL(s,'hint'):T('목표'),gb=tuLv(s,'gb');
-  return'<div class="tmGl"><div class="tmGi"><div class="tmGt"><span>'+tuEsc(hint)+'</span><button type="button" class="tmGk">'+tuEsc(T('건너뛰기'))+'</button></div>'+(gb.trim()?'<div class="tmGb">'+tuEsc(tmGb(s,c,gb))+'</div>':s.cs.map(row).join(''))+(tmGOv(s)>0&&!c.ok?'<div class="tmGv">'+tuEsc(Tf('내가 {0} 상태가 되면 게임 오버',T(TU_IN[tmGOv(s)])))+'</div>':'')+(c.ok?'<div class="tmGf">✓ '+tuEsc(T('좋아요!'))+'</div>':'')+'</div></div>'}
+  return'<div class="tmGl"><div class="tmGi"><div class="tmGt"><span>'+tuEsc(hint)+'</span></div>'+(gb.trim()?'<div class="tmGb">'+tuEsc(tmGb(s,c,gb))+'</div>':s.cs.map(row).join(''))+(tmGOv(s)>0&&!c.ok?'<div class="tmGv">'+tuEsc(Tf('내가 {0} 상태가 되면 게임 오버',T(TU_IN[tmGOv(s)])))+'</div>':'')+(c.ok?'<div class="tmGf">✓ '+tuEsc(T('좋아요!'))+'</div>':'')+'</div></div>'}
 function tmGoal(){const o=$('tmO'),c=TM&&TM.cur;if(!o||!c||c.s.t!='test')return;o.innerHTML=tmGoalHtml(c.s,c)}
 // 츠유가 공격해 주는 시험: 가까이 다가가서 공격하고, 합이 끝나면 gap초 쉬었다가 또 공격해요
 // ---- 전환 공격 ----
